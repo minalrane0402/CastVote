@@ -4,7 +4,7 @@ CastVote is a modern, high-performance web application designed for live audienc
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
 * **⚡ Real-Time Live Polling**: Presenters create multiple-choice polls on the fly. Results synchronize live as audience members tap their choices.
 * **💬 Upvoted Audience Q&A**: Anonymous question submission board with live upvoting, moderation, and answered/archived tagging.
@@ -17,7 +17,7 @@ CastVote is a modern, high-performance web application designed for live audienc
 
 ---
 
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
 ### Prerequisites
 * **Node.js**: v18.0.0 or higher
@@ -51,13 +51,13 @@ CastVote is a modern, high-performance web application designed for live audienc
 
 ---
 
-## 📖 How It Works & How to Use It
+## How It Works & How to Use It
 
 ### 1. Presenter Workflow
 1. Navigate to the homepage and click **Create Session**.
 2. Enter your event title (e.g., *"Engineering All-Hands 2026"*).
 3. You will land in the **Presenter Control Panel**:
-   - **Launch Polls**: Type questions manually or click **✨ Draft with AI** to generate options automatically. Click **Launch** to push a poll to audience screens.
+   - **Launch Polls**: Type questions manually or click ** Draft with AI** to generate options automatically. Click **Launch** to push a poll to audience screens.
    - **Moderate Q&A**: Monitor incoming questions, view upvote counts, mark items as **Answered Live**, or archive off-topic items.
    - **Open Projector View**: Click **Projector View** to display full-screen charts and the join QR code on the main stage screen.
 
@@ -68,7 +68,7 @@ CastVote is a modern, high-performance web application designed for live audienc
 
 ---
 
-## 🛠️ Built With
+## Built With
 
 * **Frontend**: React 19, Vite, Tailwind CSS, Motion (Framer Motion), Lucide Icons, Canvas Confetti, QRCode.react
 * **Backend**: Node.js, Express, tsx
