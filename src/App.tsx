@@ -20,7 +20,7 @@ export default function App() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Parse URL hash routing on load and on hash change
+  // Hash-based Router
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
@@ -32,7 +32,6 @@ export default function App() {
         return;
       }
 
-      // Format: #/room/DEMO, #/room/DEMO/presenter, #/room/DEMO/projector
       const match = hash.match(/^#\/room\/([A-Za-z0-9_-]+)(?:\/(\w+))?$/);
       if (match) {
         const id = match[1].toUpperCase();
@@ -47,7 +46,6 @@ export default function App() {
           setCurrentView("participant");
         }
       } else {
-        // Fallback for short hash like #/DEMO
         const shortMatch = hash.match(/^#\/([A-Za-z0-9_-]+)$/);
         if (shortMatch) {
           const id = shortMatch[1].toUpperCase();
@@ -68,7 +66,7 @@ export default function App() {
     };
   }, []);
 
-  // Initial Room Fetch
+  // Fetch Room State
   useEffect(() => {
     if (!roomId) return;
 
@@ -84,7 +82,7 @@ export default function App() {
       } catch (err: any) {
         console.error(err);
         if (isMounted) {
-          setError(err.message || "Failed to load session. Please check your room code.");
+          setError(err.message || "Failed to load session room.");
           setCurrentView("landing");
           setRoomId(null);
           setRoom(null);
@@ -104,7 +102,7 @@ export default function App() {
     };
   }, [roomId]);
 
-  // Real-time Cloud Firestore / Subscribed Sync Loop
+  // Real-Time Room Subscription (Firestore Snapshot or Fallback Sync)
   useEffect(() => {
     if (!roomId || isLoading) return;
 
@@ -129,7 +127,7 @@ export default function App() {
       setRoomId(newRoom.id);
       window.location.hash = `#/room/${newRoom.id}/presenter`;
     } catch (err: any) {
-      setError(err.message || "Failed to create room");
+      setError(err.message || "Failed to create event room");
     } finally {
       setIsLoading(false);
     }
@@ -145,13 +143,12 @@ export default function App() {
       setRoomId(upperCode);
       window.location.hash = `#/room/${upperCode}`;
     } catch (err: any) {
-      setError(`Room "${upperCode}" not found. Try "DEMO" or check your code.`);
+      setError(`Room "${upperCode}" not found. Check code or try "DEMO".`);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Participant Operations
   const handleVote = async (pollId: string, optionIndex: number) => {
     if (!roomId) return;
     const userId = getOrCreateUserId();
@@ -181,7 +178,6 @@ export default function App() {
       }
     } catch (err: any) {
       alert(err.message || "Failed to submit vote");
-      // Refetch latest state on failure
       forceRefresh();
     }
   };
@@ -232,7 +228,6 @@ export default function App() {
     }
   };
 
-  // Presenter Operations
   const handleCreatePoll = async (question: string, options: string[]) => {
     if (!roomId) return;
     try {
@@ -280,7 +275,7 @@ export default function App() {
 
   const handleDeletePoll = async (pollId: string) => {
     if (!roomId) return;
-    if (!confirm("Are you sure you want to delete this poll? This will erase all results.")) return;
+    if (!confirm("Are you sure you want to delete this poll? Results will be removed.")) return;
     try {
       await deletePoll(roomId, pollId);
       if (room) {
@@ -365,7 +360,6 @@ export default function App() {
     window.location.hash = `#/room/${roomId}/presenter`;
   };
 
-  // Routing Switch
   if (currentView === "landing") {
     return (
       <LandingPage 
@@ -380,13 +374,13 @@ export default function App() {
   if (isLoading || !room) {
     return (
       <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center font-sans gap-4">
-        <div className="bg-cyan-500 text-black p-3 rounded-none border-2 border-white animate-pulse">
-          <svg className="animate-spin h-6 w-6 text-black" fill="none" viewBox="0 0 24 24">
+        <div className="w-10 h-10 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center animate-pulse">
+          <svg className="animate-spin h-5 w-5 text-sky-400" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
         </div>
-        <p className="text-zinc-400 font-mono font-medium text-xs uppercase tracking-widest">Connecting to CastVote...</p>
+        <p className="text-zinc-400 font-medium text-xs">Connecting to CastVote session...</p>
       </div>
     );
   }

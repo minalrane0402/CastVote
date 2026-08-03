@@ -1,13 +1,11 @@
-import { Room, Poll, Question } from "../types";
+import { Room, Poll, Question, AISummary } from "../types";
 import { db, isFirebaseConfigured } from "./firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 
-// Base API URL is relative to the origin
 const API_BASE = "";
 
-// Helper to get or create an anonymous user ID stored in localStorage
 export function getOrCreateUserId(): string {
-  if (typeof window === "undefined") return "server-id";
+  if (typeof window === "undefined") return "usr_server";
   let userId = localStorage.getItem("castvote_user_id");
   if (!userId) {
     userId = "usr_" + Math.random().toString(36).substring(2, 11);
@@ -16,30 +14,28 @@ export function getOrCreateUserId(): string {
   return userId;
 }
 
-// Real-time Cloud Firestore or Fallback Polling Listener
 export function subscribeToRoom(roomId: string, callback: (room: Room) => void): () => void {
   const upperCode = roomId.toUpperCase();
-  
+
   if (isFirebaseConfigured() && db) {
-    // Real-time Firebase Firestore listener
     const roomRef = doc(db, "rooms", upperCode);
     const unsubscribe = onSnapshot(roomRef, (snapshot) => {
       if (snapshot.exists()) {
         callback(snapshot.data() as Room);
       }
     }, (err) => {
-      console.warn("Firestore snapshot error:", err);
+      console.warn("Firestore snapshot update error:", err);
     });
     return unsubscribe;
   }
 
-  // Fallback 2-second polling listener
+  // Fallback 2-second background sync
   const intervalId = setInterval(async () => {
     try {
       const roomData = await getRoom(upperCode);
       callback(roomData);
     } catch (err) {
-      // Ignore background sync hiccups
+      // Ignore background sync errors
     }
   }, 2000);
 
@@ -63,7 +59,7 @@ export async function getRoom(roomId: string): Promise<Room> {
   const response = await fetch(`${API_BASE}/api/rooms/${roomId}`);
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
-    throw new Error(err.error || `Failed to fetch room ${roomId}`);
+    throw new Error(err.error || `Room ${roomId} not found`);
   }
   return response.json();
 }
@@ -186,7 +182,7 @@ export async function deleteQuestion(roomId: string, questionId: string): Promis
   return response.json();
 }
 
-// AI API calls
+// AI Service Integrations
 export async function generateAIPoll(topic: string): Promise<{ question: string; options: string[] }> {
   const response = await fetch(`${API_BASE}/api/ai/generate-poll`, {
     method: "POST",
@@ -194,19 +190,21 @@ export async function generateAIPoll(topic: string): Promise<{ question: string;
     body: JSON.stringify({ topic }),
   });
   if (!response.ok) {
-    throw new Error("Failed to generate AI poll");
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to generate AI poll");
   }
   return response.json();
 }
 
-export async function summarizeAIQA(roomId: string): Promise<{ summary: string; keyPoints: string[] }> {
+export async function summarizeAIQA(roomId: string): Promise<AISummary> {
   const response = await fetch(`${API_BASE}/api/ai/summarize-qa`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ roomId }),
   });
   if (!response.ok) {
-    throw new Error("Failed to summarize Q&A");
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to summarize Q&A");
   }
   return response.json();
 }

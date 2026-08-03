@@ -30,8 +30,6 @@ if (isFirebaseConfigured()) {
   } catch (err) {
     console.warn("Firebase initialization skipped:", err);
   }
-} else {
-  console.log("ℹ️ CastVote running with standard real-time sync mode. Add VITE_FIREBASE_PROJECT_ID in .env to connect Cloud Firestore directly.");
 }
 
 export const db = dbInstance;

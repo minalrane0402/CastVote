@@ -2,8 +2,8 @@ export interface Poll {
   id: string;
   question: string;
   options: string[];
-  votes: Record<number, number>; // index of option -> count of votes
-  votedUsers: string[]; // anonymous user IDs who have voted
+  votes: Record<number, number>; // optionIndex -> count
+  votedUsers: string[]; // anonymous user IDs
   isActive: boolean;
   isClosed: boolean;
 }
@@ -12,16 +12,21 @@ export interface Question {
   id: string;
   text: string;
   upvotes: number;
-  upvotedBy: string[]; // anonymous user IDs who have upvoted
+  upvotedBy: string[]; // anonymous user IDs
   isAnswered: boolean;
   isArchived: boolean;
   createdAt: string;
 }
 
 export interface Room {
-  id: string; // The short room code (e.g. "PULSE")
+  id: string; // 5-letter room code (e.g. "DEMO")
   title: string;
   createdAt: string;
   polls: Poll[];
   questions: Question[];
+}
+
+export interface AISummary {
+  summary: string;
+  keyPoints: string[];
 }

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Vote, MessageSquare, QrCode, Sparkles, ChevronRight, Play, ArrowRight } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Vote, MessageSquare, QrCode, Sparkles, ChevronRight, Play, ArrowRight, ShieldCheck, Zap, Users } from "lucide-react";
 import { motion } from "motion/react";
 
 interface LandingPageProps {
@@ -14,6 +14,20 @@ export default function LandingPage({ onCreateRoom, onJoinRoom, isLoading, error
   const [roomTitle, setRoomTitle] = useState("");
   const [activeTab, setActiveTab] = useState<"join" | "create">("join");
 
+  // Keyboard shortcut listener ('/' or 'Cmd+K' to focus join code)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setActiveTab("join");
+        const el = document.getElementById("join-code-input");
+        if (el) el.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const handleJoinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!joinCode.trim()) return;
@@ -27,237 +41,252 @@ export default function LandingPage({ onCreateRoom, onJoinRoom, isLoading, error
   };
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-white flex flex-col justify-between font-sans selection:bg-accent-1 selection:text-black">
-      {/* Header */}
-      <header className="border-b-2 border-zinc-900 bg-[#09090B]/90 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <div className="min-h-screen bg-[#09090B] text-slate-100 flex flex-col justify-between font-sans selection:bg-sky-500/30 selection:text-sky-200">
+      {/* Navigation Header */}
+      <header className="border-b border-zinc-800/80 bg-[#09090B]/80 backdrop-blur-xl sticky top-0 z-50">
+        <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 h-24 sm:h-28 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="bg-zinc-100 text-black p-2.5 rounded-none border-2 border-white flex items-center justify-center">
-              <Vote className="h-5 w-5 animate-pulse text-black" />
+            <div className="bg-gradient-to-tr from-sky-400 to-indigo-500 text-black p-3 rounded-2xl shadow-lg shadow-sky-500/20 flex items-center justify-center">
+              <Vote className="h-8 w-8 text-zinc-950 stroke-[2.5]" />
             </div>
             <div>
-              <span className="font-mono font-black text-2xl tracking-tighter uppercase text-white">
-                CAST<span className="text-accent-1 font-sans">VOTE</span>
+              <span className="font-sans font-bold text-3xl sm:text-4xl tracking-tight text-white">
+                Cast<span className="text-sky-400">Vote</span>
               </span>
-              <span className="ml-2 px-2 py-0.5 text-[10px] font-black font-mono uppercase bg-accent-1/20 text-accent-1 rounded-none border border-accent-1/30">
-                REALTIME
+              <span className="ml-2 px-2 py-0.5 text-[10px] font-mono font-semibold bg-sky-500/10 text-sky-400 rounded-full border border-sky-500/20">
+                Live Engagement
               </span>
             </div>
           </div>
           
-          <div className="hidden sm:flex items-center space-x-6 text-xs font-mono uppercase tracking-wider text-zinc-400">
-            <span className="flex items-center gap-2 hover:text-white transition-colors">
-              <span className="h-2 w-2 rounded-full bg-accent-1 inline-block animate-ping"></span>
-              Real-time Polls
+          <div className="hidden sm:flex items-center space-x-6 text-xs font-medium text-zinc-400">
+            <span className="flex items-center gap-2 hover:text-zinc-200 transition-colors">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+              Real-Time Polling
             </span>
-            <span className="flex items-center gap-2 hover:text-white transition-colors">
-              <span className="h-2 w-2 rounded-full bg-accent-2 inline-block"></span>
-              Interactive Q&A
+            <span className="flex items-center gap-2 hover:text-zinc-200 transition-colors">
+              <span className="h-2 w-2 rounded-full bg-sky-400 inline-block"></span>
+              Upvoted Q&A
             </span>
+            <button
+              onClick={() => onJoinRoom("DEMO")}
+              className="px-3.5 py-1.5 bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 hover:text-white rounded-lg border border-zinc-700/60 transition-all text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+            >
+              <Play className="h-3 w-3 fill-current" /> Try Demo Room
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Hero / Action Area */}
+      {/* Main Hero & Action Section */}
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+        {/* Left Column: Hero Text */}
         <div className="flex-1 space-y-6 text-center lg:text-left">
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-accent-1 rounded-none text-xs font-mono uppercase tracking-widest"
+            transition={{ duration: 0.4 }}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-sky-500/10 border border-sky-500/20 text-sky-300 rounded-full text-xs font-medium"
           >
-            <Sparkles className="h-3.5 w-3.5" /> ZERO INSTALL • 100% WEB-BASED
+            <Sparkles className="h-3.5 w-3.5 text-sky-400" />
+            <span>ZERO APP DOWNLOAD • 100% WEB-BASED</span>
           </motion.div>
           
           <motion.h1
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white uppercase leading-none"
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1]"
           >
-            ENGAGE YOUR <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-1 via-accent-2 to-accent-3">
-              AUDIENCE LIVE
+            ENGAGE YOUR AUDIENCE LIVE <br />
+            <span className="bg-gradient-to-r from-sky-400 via-indigo-400 to-pink-400 bg-clip-text text-transparent">
+              in real time.
             </span>
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.4, delay: 0.15 }}
             className="text-base sm:text-lg text-zinc-400 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed"
           >
-            CastVote is a lightweight, real-time Slido replacement. Presenters create event rooms, audiences scan local QR codes to vote and upvote Q&A topics anonymously, and results synchronize instantly on stage.
+            CastVote makes live keynotes, workshops, and team meetings interactive. Launch live polls, let attendees upvote burning questions anonymously, and broadcast results on stage.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="pt-4 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="pt-2 flex flex-col sm:flex-row gap-3.5 justify-center lg:justify-start"
           >
             <button
               onClick={() => onJoinRoom("DEMO")}
-              className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-white hover:bg-zinc-200 text-black font-mono font-bold uppercase tracking-wider transition-all duration-200 border-2 border-white cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-sky-500 hover:bg-sky-400 text-zinc-950 font-semibold rounded-xl transition-all duration-150 shadow-lg shadow-sky-500/20 cursor-pointer text-sm"
             >
-              <Play className="h-4 w-4 fill-black" /> DEMO ROOM
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <Play className="h-4 w-4 fill-zinc-950" /> EXPLORE DEMO ROOM
             </button>
+            
+            <a
+              href="#features"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white font-medium rounded-xl border border-zinc-800 transition-all cursor-pointer text-sm"
+            >
+              Learn How It Works <ArrowRight className="h-4 w-4" />
+            </a>
           </motion.div>
         </div>
 
-        {/* Right card: Join/Create Tabs */}
+        {/* Right Column: Tabbed Join / Create Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
-          className="w-full max-w-md bg-zinc-950 border-2 border-zinc-800 p-6 sm:p-8 rounded-none relative overflow-hidden"
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="w-full max-w-md glass-panel p-6 sm:p-8 rounded-2xl relative shadow-2xl border border-zinc-800/80"
         >
-          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-accent-1 via-accent-2 to-accent-3"></div>
-
-          {/* Tabs */}
-          <div className="flex border-b border-zinc-900 pb-4 mb-6">
+          {/* Card Tabs */}
+          <div className="flex bg-zinc-900/90 p-1 rounded-xl mb-6 border border-zinc-800">
             <button
               onClick={() => setActiveTab("join")}
-              className={`flex-1 text-center pb-3 text-xs uppercase font-mono font-black tracking-widest border-b-2 transition-all cursor-pointer ${
+              className={`flex-1 text-center py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                 activeTab === "join"
-                  ? "border-accent-1 text-accent-1"
-                  : "border-transparent text-zinc-500 hover:text-zinc-300"
+                  ? "bg-zinc-800 text-white shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
-              Join Session
+              JOIN SESSION
             </button>
             <button
               onClick={() => setActiveTab("create")}
-              className={`flex-1 text-center pb-3 text-xs uppercase font-mono font-black tracking-widest border-b-2 transition-all cursor-pointer ${
+              className={`flex-1 text-center py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                 activeTab === "create"
-                  ? "border-accent-3 text-accent-3"
-                  : "border-transparent text-zinc-500 hover:text-zinc-300"
+                  ? "bg-zinc-800 text-white shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
-              Create Session
+              CREATE SESSION
             </button>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-rose-950/50 text-rose-300 text-xs font-mono uppercase tracking-wider rounded-none border border-rose-800 flex items-center">
-              <span className="mr-2">⚠️</span> {error}
+            <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs rounded-xl flex items-center gap-2">
+              <span>⚠️</span>
+              <span>{error}</span>
             </div>
           )}
 
           {activeTab === "join" ? (
             <form onSubmit={handleJoinSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-black font-mono uppercase tracking-widest text-zinc-400 mb-2">
-                  ENTER ROOM CODE
+                <label className="block text-xs font-semibold text-zinc-300 mb-2 flex justify-between">
+                  <span>ENTER 5-LETTER ROOM CODE</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">Press ⌘K to focus</span>
                 </label>
                 <input
+                  id="join-code-input"
                   type="text"
                   maxLength={5}
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value)}
                   placeholder="DEMO"
-                  className="w-full text-center text-4xl font-black font-mono tracking-widest uppercase bg-zinc-900 border-2 border-zinc-850 hover:border-zinc-700 focus:border-accent-1 focus:bg-[#121214] focus:outline-none rounded-none py-4 transition-all text-white placeholder-zinc-700"
+                  className="w-full text-center text-3xl font-bold font-mono tracking-widest uppercase bg-zinc-950/80 border border-zinc-800 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none rounded-xl py-3.5 transition-all text-white placeholder-zinc-700"
                   disabled={isLoading}
                   autoFocus
                 />
               </div>
               <button
                 type="submit"
-                className="w-full py-4 px-4 bg-accent-1 hover:bg-cyan-300 text-black font-mono font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 px-4 bg-sky-500 hover:bg-sky-400 text-zinc-950 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-sky-500/15"
                 disabled={isLoading}
               >
-                {isLoading ? "JOINING..." : "JOIN EVENT"}
-                <ChevronRight className="h-5 w-5 stroke-[3]" />
+                {isLoading ? "Connecting..." : "Join Session"}
+                <ChevronRight className="h-4 w-4 stroke-[2.5]" />
               </button>
-              <p className="text-center text-[11px] font-mono uppercase text-zinc-500">
-                No logins, no signups required.
+              <p className="text-center text-[11px] text-zinc-500">
+                NO LOGINS, NO SIGNUPS REQUIRED.
               </p>
             </form>
           ) : (
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-black font-mono uppercase tracking-widest text-zinc-400 mb-2">
+                <label className="block text-xs font-semibold text-zinc-300 mb-2">
                   EVENT / SESSION TITLE
                 </label>
                 <input
                   type="text"
                   value={roomTitle}
                   onChange={(e) => setRoomTitle(e.target.value)}
-                  placeholder="e.g. Weekly All-Hands Meeting"
-                  className="w-full bg-zinc-900 border-2 border-zinc-850 focus:border-accent-3 focus:bg-[#121214] focus:outline-none rounded-none px-4 py-3.5 text-sm font-semibold transition-all text-white placeholder-zinc-600"
+                  placeholder="e.g. Q3 All-Hands Meeting"
+                  className="w-full bg-zinc-950/80 border border-zinc-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none rounded-xl px-4 py-3 text-sm font-medium transition-all text-white placeholder-zinc-600"
                   disabled={isLoading}
                   autoFocus
                 />
               </div>
               <button
                 type="submit"
-                className="w-full py-4 px-4 bg-accent-3 hover:bg-pink-300 text-black font-mono font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 px-4 bg-indigo-500 hover:bg-indigo-400 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-500/15"
                 disabled={isLoading}
               >
-                {isLoading ? "CREATING..." : "CREATE EVENT ROOM"}
-                <ChevronRight className="h-5 w-5 stroke-[3]" />
+                {isLoading ? "Creating..." : "Create Event Room"}
+                <ChevronRight className="h-4 w-4 stroke-[2.5]" />
               </button>
-              <p className="text-center text-[11px] font-mono uppercase text-zinc-500">
-                You will receive a room code and presenter controls.
+              <p className="text-center text-[11px] text-zinc-500">
+                Instantly generates a presenter dashboard & projector view.
               </p>
             </form>
           )}
         </motion.div>
       </main>
 
-      {/* Feature pillars section */}
-      <section className="bg-zinc-950/60 border-t-2 border-zinc-900 py-16">
+      {/* Feature Pillars Section */}
+      <section id="features" className="border-t border-zinc-800/60 bg-zinc-950/50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="flex gap-4 p-5 bg-zinc-900/20 border border-zinc-800 hover:border-zinc-700 transition-colors">
-              <div className="bg-accent-1/10 text-accent-1 p-3.5 h-12 w-12 rounded-none border border-accent-1/20 flex items-center justify-center shrink-0">
-                <Vote className="h-6 w-6" />
+          <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
+            <h2 className="text-2xl font-bold text-white tracking-tight">Built for live events of any scale</h2>
+            <p className="text-sm text-zinc-400">Everything presenters and attendees need for smooth, real-time engagement.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="glass-panel glass-panel-hover p-6 rounded-2xl space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center border border-sky-500/20">
+                <Vote className="h-5 w-5" />
               </div>
-              <div>
-                <h3 className="font-mono font-bold uppercase text-white mb-1.5 tracking-wider">Instant Realtime Polls</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Design multiple-choice polls or generate them instantly with Gemini AI. Audience responses sync live.
-                </p>
-              </div>
+              <h3 className="text-base font-semibold text-white">Live Polling & Charts</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Create multiple-choice polls or draft them with AI. Votes update automatically on screen as choices are tapped.
+              </p>
             </div>
 
-            <div className="flex gap-4 p-5 bg-zinc-900/20 border border-zinc-800 hover:border-zinc-700 transition-colors">
-              <div className="bg-accent-2/10 text-accent-2 p-3.5 h-12 w-12 rounded-none border border-accent-2/20 flex items-center justify-center shrink-0">
-                <MessageSquare className="h-6 w-6" />
+            <div className="glass-panel glass-panel-hover p-6 rounded-2xl space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20">
+                <MessageSquare className="h-5 w-5" />
               </div>
-              <div>
-                <h3 className="font-mono font-bold uppercase text-white mb-1.5 tracking-wider">Upvoted Q&A Boards</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Anonymous question submission with real-time upvoting and AI-powered topic summarization.
-                </p>
-              </div>
+              <h3 className="text-base font-semibold text-white">Upvoted Q&A Boards</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Attendees ask questions anonymously. Upvoting pushes key topics to the top of the presenter's queue.
+              </p>
             </div>
 
-            <div className="flex gap-4 p-5 bg-zinc-900/20 border border-zinc-800 hover:border-zinc-700 transition-colors">
-              <div className="bg-accent-3/10 text-accent-3 p-3.5 h-12 w-12 rounded-none border border-accent-3/20 flex items-center justify-center shrink-0">
-                <QrCode className="h-6 w-6" />
+            <div className="glass-panel glass-panel-hover p-6 rounded-2xl space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center border border-pink-500/20">
+                <QrCode className="h-5 w-5" />
               </div>
-              <div>
-                <h3 className="font-mono font-bold uppercase text-white mb-1.5 tracking-wider">Sleek QR Code Joining</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Projector mode generates a custom scannable QR code using fast local SVG rendering.
-                </p>
-              </div>
+              <h3 className="text-base font-semibold text-white">Stage Projector & Local QR</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Stage screen mode generates a scannable QR code using fast local rendering, keeping audience access reliable.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-black text-zinc-500 py-8 text-xs border-t-2 border-zinc-900">
+      <footer className="border-t border-zinc-900 bg-[#09090B] py-6 text-xs text-zinc-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="font-mono uppercase tracking-wider text-[11px]">
-            &copy; 2026 CASTVOTE INC. REAL-TIME VOTING &amp; AUDIENCE ENGAGEMENT.
+          <div className="flex items-center space-x-2">
+            <span className="font-semibold text-zinc-300">CastVote</span>
+            <span>— Real-Time Voting &amp; Audience Engagement</span>
           </div>
-          <div className="font-mono uppercase text-zinc-650 text-[10px] tracking-widest bg-zinc-900/40 px-3 py-1 border border-zinc-800">
-            SYSTEM STATUS: ONLINE
+          <div className="text-[11px] text-zinc-600 font-mono">
+            MIT Licensed • Zero Local Footprint
           </div>
         </div>
       </footer>

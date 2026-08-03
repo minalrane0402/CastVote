@@ -37,7 +37,7 @@ export default function PresenterControl({
   const [activeSubTab, setActiveSubTab] = useState<"polls" | "qa">("polls");
   const [copied, setCopied] = useState(false);
   
-  // Create Poll State
+  // Poll creation form
   const [newQuestion, setNewQuestion] = useState("");
   const [newOptions, setNewOptions] = useState<string[]>(["", ""]);
   const [qaFilter, setQaFilter] = useState<"active" | "answered" | "archived">("active");
@@ -89,7 +89,6 @@ export default function PresenterControl({
     setNewOptions(["", ""]);
   };
 
-  // AI Poll Generator Trigger
   const handleAIPollGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!aiTopicInput.trim()) return;
@@ -104,13 +103,12 @@ export default function PresenterControl({
         setAiTopicInput("");
       }
     } catch (err: any) {
-      alert("AI Poll Generation failed: " + (err.message || "Unknown error"));
+      alert("AI Poll Generation: " + (err.message || "Could not generate poll choices"));
     } finally {
       setIsGeneratingAI(false);
     }
   };
 
-  // AI Q&A Summary Trigger
   const handleAISummarizeQA = async () => {
     setIsSummarizingAI(true);
     setShowAiSummaryModal(true);
@@ -120,8 +118,8 @@ export default function PresenterControl({
     } catch (err: any) {
       console.error(err);
       setAiSummaryResult({
-        summary: "Could not summarize Q&A at this moment.",
-        keyPoints: ["Please try again in a few seconds."]
+        summary: "Could not generate Q&A summary.",
+        keyPoints: ["Check back in a few seconds after attendees submit questions."]
       });
     } finally {
       setIsSummarizingAI(false);
@@ -141,58 +139,51 @@ export default function PresenterControl({
   const activePoll = room.polls.find(p => p.isActive);
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-white flex flex-col justify-between font-sans selection:bg-accent-1 selection:text-black">
-      {/* Dashboard Header */}
-      <header className="border-b-2 border-zinc-900 bg-[#09090B] sticky top-0 z-40 px-4 sm:px-6 lg:px-8 py-5">
+    <div className="min-h-screen bg-[#09090B] text-slate-100 flex flex-col justify-between font-sans selection:bg-sky-500/30 selection:text-sky-200">
+      {/* Header */}
+      <header className="border-b border-zinc-800/80 bg-[#09090B]/90 sticky top-0 z-40 px-4 sm:px-6 lg:px-8 py-4 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           
-          {/* Logo & Title */}
           <div className="flex items-center space-x-3">
-            <div className="bg-white text-black p-2.5 rounded-none border-2 border-white flex items-center justify-center">
-              <Vote className="h-5 w-5 text-black" />
+            <div className="bg-gradient-to-tr from-sky-400 to-indigo-500 text-black p-2 rounded-xl shadow-lg shadow-sky-500/20">
+              <Vote className="h-5 w-5 text-zinc-950 stroke-[2.5]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mono font-black text-lg text-white uppercase tracking-tight">CASTVOTE PRESENTER</span>
-                <span className="text-[10px] bg-zinc-900 text-zinc-300 font-mono font-bold uppercase px-2 py-0.5 rounded-none border border-zinc-800">
-                  CTRL PANEL
+                <span className="font-semibold text-white text-base">Presenter Dashboard</span>
+                <span className="text-[10px] bg-zinc-800 text-zinc-300 font-mono font-medium px-2 py-0.5 rounded-full border border-zinc-700">
+                  {room.id}
                 </span>
               </div>
-              <p className="text-xs font-mono uppercase text-zinc-400">
-                EVENT: <span className="text-white font-bold">{room.title}</span>
+              <p className="text-xs text-zinc-400 font-normal truncate max-w-xs">
+                Event: <span className="text-zinc-200 font-medium">{room.title}</span>
               </p>
             </div>
           </div>
 
-          {/* Quick Stats / Codes & Shares */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="bg-zinc-950 border-2 border-zinc-900 px-3.5 py-1.5 text-center">
-              <span className="block text-[8px] uppercase font-mono font-black tracking-widest text-zinc-500">Room Code</span>
-              <span className="font-mono text-sm font-black text-accent-1 tracking-wider uppercase">{room.id}</span>
-            </div>
-
+          <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={handleCopyLink}
-              className="px-4 py-2.5 bg-zinc-900 border-2 border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white font-mono font-black uppercase text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+              className="px-3.5 py-2 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 hover:text-white rounded-xl font-medium text-xs flex items-center gap-1.5 transition-all cursor-pointer"
             >
               {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5 text-zinc-500" />}
-              {copied ? "COPIED!" : "COPY EVENT LINK"}
+              {copied ? "Link Copied!" : "Copy Event Link"}
             </button>
 
             <button
               onClick={onOpenProjector}
-              className="px-4 py-2.5 bg-accent-1 hover:bg-cyan-300 text-black font-mono font-black uppercase text-xs flex items-center gap-1.5 transition-all border-2 border-white cursor-pointer"
+              className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-zinc-950 font-semibold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md shadow-sky-500/15 cursor-pointer"
             >
-              <Monitor className="h-3.5 w-3.5 stroke-[2.5]" />
-              PROJECTOR VIEW
+              <Monitor className="h-3.5 w-3.5" />
+              Projector Display
             </button>
 
             <button
               onClick={onForceRefresh}
-              className={`p-2.5 bg-zinc-900 border-2 border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer ${
-                isSyncing ? "text-accent-1 border-accent-1/30" : ""
+              className={`p-2 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-white transition-colors cursor-pointer ${
+                isSyncing ? "text-sky-400 border-sky-500/30" : ""
               }`}
-              title="Force sync data"
+              title="Refresh Room"
             >
               <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
             </button>
@@ -201,75 +192,76 @@ export default function PresenterControl({
       </header>
 
       {/* Main Grid */}
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-12 gap-8 items-start">
+      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-12 gap-6 items-start">
         
-        {/* Left Hand: Tab Selection & Quick Status (Col 1-3) */}
+        {/* Left Navigation */}
         <section className="col-span-12 md:col-span-3 space-y-4">
-          <div className="bg-zinc-950 border-2 border-zinc-900 p-4 space-y-2 rounded-none">
-            <h3 className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest mb-3 px-1">
-              PRESENTER TABS
-            </h3>
+          <div className="glass-panel p-3.5 rounded-2xl space-y-1.5">
+            <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider block px-2.5 mb-1">
+              VIEWS &amp; QUEUES
+            </span>
             
             <button
               onClick={() => setActiveSubTab("polls")}
-              className={`w-full flex items-center justify-between p-3.5 rounded-none text-xs font-mono font-black uppercase tracking-wider transition-all cursor-pointer ${
+              className={`w-full flex items-center justify-between p-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 activeSubTab === "polls"
-                  ? "bg-zinc-900 text-accent-1 border border-accent-1/30"
-                  : "text-zinc-400 hover:bg-zinc-900/60 border border-transparent"
+                  ? "bg-zinc-800 text-sky-400 border border-sky-500/30"
+                  : "text-zinc-400 hover:bg-zinc-900/60"
               }`}
             >
               <span className="flex items-center gap-2">
-                <Vote className="h-4 w-4" /> Polls
+                <Vote className="h-4 w-4" /> Live Polls
               </span>
-              <span className="bg-zinc-950 border border-zinc-850 text-zinc-300 font-mono font-bold px-2 py-0.5 text-[10px]">
+              <span className="bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono text-[10px] px-2 py-0.5 rounded-md">
                 {room.polls.length}
               </span>
             </button>
 
             <button
               onClick={() => setActiveSubTab("qa")}
-              className={`w-full flex items-center justify-between p-3.5 rounded-none text-xs font-mono font-black uppercase tracking-wider transition-all cursor-pointer ${
+              className={`w-full flex items-center justify-between p-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 activeSubTab === "qa"
-                  ? "bg-zinc-900 text-accent-3 border border-accent-3/30"
-                  : "text-zinc-400 hover:bg-zinc-900/60 border border-transparent"
+                  ? "bg-zinc-800 text-indigo-400 border border-indigo-500/30"
+                  : "text-zinc-400 hover:bg-zinc-900/60"
               }`}
             >
               <span className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" /> Guest Q&A
+                <MessageSquare className="h-4 w-4" /> Audience Q&A
               </span>
-              <span className="bg-zinc-950 border border-zinc-850 text-zinc-300 font-mono font-bold px-2 py-0.5 text-[10px]">
+              <span className="bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono text-[10px] px-2 py-0.5 rounded-md">
                 {room.questions.filter(q => !q.isArchived).length}
               </span>
             </button>
           </div>
 
-          {/* AI Helper Banner */}
-          <div className="bg-gradient-to-br from-indigo-950/40 to-zinc-950 border-2 border-indigo-800/60 p-4 space-y-3 rounded-none">
-            <h4 className="font-mono font-black uppercase tracking-wider text-accent-1 flex items-center gap-1.5 text-xs">
-              <Sparkles className="h-4 w-4 text-accent-1 animate-pulse" /> Gemini AI Co-Pilot
-            </h4>
-            <p className="text-zinc-300 text-xs leading-relaxed">
-              Use Gemini AI to instantly write custom multi-choice polls or synthesize top audience Q&A questions live on stage.
+          {/* AI Co-Pilot Banner */}
+          <div className="glass-panel p-4 rounded-2xl space-y-3 border-indigo-500/20">
+            <div className="flex items-center gap-2 text-indigo-300 text-xs font-semibold">
+              <Sparkles className="h-4 w-4 text-indigo-400" />
+              <span>AI Presenter Assistant</span>
+            </div>
+            <p className="text-zinc-400 text-xs leading-relaxed">
+              Use Gemini AI to draft poll options or summarize top upvoted questions live.
             </p>
             <div className="pt-1 flex flex-col gap-2">
               <button
                 onClick={() => setShowAiPollModal(true)}
-                className="w-full py-2 px-3 bg-accent-1 hover:bg-cyan-300 text-black font-mono font-bold uppercase text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                className="w-full py-2 px-3 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               >
-                <Wand2 className="h-3.5 w-3.5 stroke-[2.5]" /> Auto-Generate Poll
+                <Wand2 className="h-3.5 w-3.5" /> ✨ Draft Poll with AI
               </button>
               <button
                 onClick={handleAISummarizeQA}
-                className="w-full py-2 px-3 bg-zinc-900 hover:bg-zinc-800 text-accent-3 border border-accent-3/40 font-mono font-bold uppercase text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                className="w-full py-2 px-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-semibold text-xs rounded-xl border border-zinc-800 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               >
-                <FileText className="h-3.5 w-3.5" /> Summarize Q&A Insights
+                <FileText className="h-3.5 w-3.5 text-sky-400" /> ✨ Summarize Q&A
               </button>
             </div>
           </div>
         </section>
 
-        {/* Right Hand: Interactive Workspaces (Col 4-12) */}
-        <section className="col-span-12 md:col-span-9 bg-zinc-950 border-2 border-zinc-900 p-6 shadow-sm min-h-[500px] rounded-none">
+        {/* Right Workspace Panel */}
+        <section className="col-span-12 md:col-span-9 glass-panel p-6 rounded-2xl min-h-[480px]">
           <AnimatePresence mode="wait">
             {activeSubTab === "polls" ? (
               <motion.div
@@ -278,47 +270,47 @@ export default function PresenterControl({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -5 }}
                 transition={{ duration: 0.15 }}
-                className="grid grid-cols-1 lg:grid-cols-12 gap-8"
+                className="grid grid-cols-1 lg:grid-cols-12 gap-6"
               >
-                {/* Create Poll Box (Lg: Col 1-5) */}
-                <div className="lg:col-span-5 space-y-5">
-                  <div className="border-b border-zinc-900 pb-3 flex justify-between items-center">
+                {/* Create Poll Form */}
+                <div className="lg:col-span-5 space-y-4">
+                  <div className="border-b border-zinc-800 pb-3 flex justify-between items-center">
                     <div>
-                      <h3 className="font-mono font-black uppercase tracking-wider text-white text-sm">Create a New Poll</h3>
-                      <p className="text-[11px] text-zinc-400">Add options for multi-choice response.</p>
+                      <h3 className="font-semibold text-white text-sm">Create New Poll</h3>
+                      <p className="text-[11px] text-zinc-400">Add choices for audience voting.</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowAiPollModal(true)}
-                      className="p-1.5 bg-accent-1/10 hover:bg-accent-1 text-accent-1 hover:text-black border border-accent-1/30 text-[10px] font-mono font-black uppercase transition-all flex items-center gap-1 cursor-pointer"
+                      className="p-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-lg text-[11px] font-medium transition-all flex items-center gap-1 cursor-pointer"
                     >
-                      <Wand2 className="h-3 w-3" /> AI Fill
+                      <Wand2 className="h-3 w-3" /> Draft AI
                     </button>
                   </div>
 
-                  <form onSubmit={handleCreatePollSubmit} className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest block">
-                        Question Text
+                  <form onSubmit={handleCreatePollSubmit} className="space-y-3.5">
+                    <div>
+                      <label className="text-[11px] font-semibold text-zinc-400 block mb-1">
+                        Question Prompt
                       </label>
                       <input
                         type="text"
                         required
                         value={newQuestion}
                         onChange={(e) => setNewQuestion(e.target.value)}
-                        placeholder="e.g. Which project should we prioritize next?"
-                        className="w-full bg-zinc-900 border-2 border-zinc-850 focus:border-accent-1 focus:bg-[#121214] focus:outline-none rounded-none px-3.5 py-2.5 text-xs font-semibold transition-all text-white placeholder-zinc-600"
+                        placeholder="e.g. Which topic shall we discuss first?"
+                        className="w-full bg-zinc-950/80 border border-zinc-800 focus:border-sky-500 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-600"
                       />
                     </div>
 
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest block">
-                        Answer Options
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-semibold text-zinc-400 block">
+                        Options
                       </label>
                       
                       {newOptions.map((option, idx) => (
                         <div key={idx} className="flex items-center gap-2">
-                          <span className="text-xs font-mono text-zinc-500 font-bold shrink-0 w-4">
+                          <span className="text-xs font-mono text-zinc-500 w-3 shrink-0">
                             {idx + 1}.
                           </span>
                           <input
@@ -327,13 +319,13 @@ export default function PresenterControl({
                             value={option}
                             onChange={(e) => handleOptionChange(idx, e.target.value)}
                             placeholder={`Option ${idx + 1}`}
-                            className="flex-grow bg-zinc-900 border-2 border-zinc-850 focus:border-accent-1 focus:bg-[#121214] focus:outline-none rounded-none px-3 py-2 text-xs font-medium transition-all text-white placeholder-zinc-650"
+                            className="flex-grow bg-zinc-950/80 border border-zinc-800 focus:border-sky-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-600"
                           />
                           {newOptions.length > 2 && (
                             <button
                               type="button"
                               onClick={() => handleRemoveOption(idx)}
-                              className="text-zinc-500 hover:text-rose-400 p-1.5 rounded-none hover:bg-zinc-900 transition-colors cursor-pointer"
+                              className="text-zinc-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-zinc-900 transition-colors cursor-pointer"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -345,9 +337,9 @@ export default function PresenterControl({
                         <button
                           type="button"
                           onClick={handleAddOption}
-                          className="text-accent-1 hover:text-cyan-300 text-xs font-mono font-black uppercase tracking-wider flex items-center gap-1 mt-2 px-1 py-1 transition-colors cursor-pointer"
+                          className="text-sky-400 hover:text-sky-300 text-xs font-medium flex items-center gap-1 mt-1.5 px-1 py-1 cursor-pointer"
                         >
-                          <Plus className="h-3.5 w-3.5 stroke-[3]" /> Add Option
+                          <Plus className="h-3.5 w-3.5" /> Add Choice
                         </button>
                       )}
                     </div>
@@ -355,76 +347,68 @@ export default function PresenterControl({
                     <button
                       type="submit"
                       disabled={!newQuestion.trim() || newOptions.filter(Boolean).length < 2}
-                      className="w-full py-3.5 px-4 bg-accent-1 hover:bg-cyan-300 disabled:bg-zinc-900 text-black disabled:text-zinc-600 font-mono font-black uppercase text-xs tracking-wider border-2 border-white disabled:border-transparent transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-2.5 px-4 bg-sky-500 hover:bg-sky-400 disabled:bg-zinc-800 text-zinc-950 disabled:text-zinc-500 font-semibold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-sky-500/10"
                     >
-                      <Plus className="h-4 w-4 stroke-[3]" /> Create Poll
+                      <Plus className="h-4 w-4" /> Create Poll
                     </button>
                   </form>
                 </div>
 
-                {/* Polls list & visualizer (Lg: Col 6-12) */}
-                <div className="lg:col-span-7 space-y-5">
-                  <div className="border-b border-zinc-900 pb-3 flex justify-between items-center">
+                {/* Poll List & Active Monitor */}
+                <div className="lg:col-span-7 space-y-4">
+                  <div className="border-b border-zinc-800 pb-3 flex justify-between items-center">
                     <div>
-                      <h3 className="font-mono font-black uppercase tracking-wider text-white text-sm">Session Polls</h3>
-                      <p className="text-[11px] text-zinc-400">Currently configured voting panels.</p>
+                      <h3 className="font-semibold text-white text-sm">Session Polls</h3>
+                      <p className="text-[11px] text-zinc-400">Manage and broadcast voting rounds.</p>
                     </div>
                     {activePoll && (
-                      <span className="bg-accent-1/10 text-accent-1 font-mono font-black px-2.5 py-1 border border-accent-1/20 text-[10px] uppercase tracking-wider animate-pulse flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-accent-1"></span> 1 Poll Active
+                      <span className="bg-emerald-500/10 text-emerald-400 font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/20 text-[10px] flex items-center gap-1.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1 Poll Active
                       </span>
                     )}
                   </div>
 
                   {room.polls.length === 0 ? (
-                    <div className="border-2 border-dashed border-zinc-800 p-12 text-center text-zinc-500 text-xs font-mono uppercase rounded-none">
-                      No polls created yet. Fill out the form or click "AI Fill" to start collecting feedback!
+                    <div className="border border-dashed border-zinc-800 p-12 text-center text-zinc-500 text-xs rounded-2xl">
+                      No polls added yet. Use the form on the left or click "Draft AI" to start.
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-3.5">
                       {room.polls.map((poll) => {
                         const totalVotes = getTotalVotes(poll);
                         return (
                           <div
                             key={poll.id}
-                            className={`p-4 border-2 space-y-3 transition-all bg-zinc-950/40 rounded-none relative overflow-hidden ${
-                              poll.isActive 
-                                ? "border-accent-1" 
-                                : "border-zinc-900"
+                            className={`p-4 rounded-xl border space-y-3 transition-all glass-panel ${
+                              poll.isActive ? "border-sky-500/50" : "border-zinc-800/80"
                             }`}
                           >
                             <div className="flex justify-between items-start gap-4">
-                              <div className="space-y-1.5 min-w-0">
+                              <div className="space-y-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <h4 className="font-bold text-xs sm:text-sm text-white truncate leading-snug uppercase">
+                                  <h4 className="font-semibold text-xs sm:text-sm text-white truncate">
                                     {poll.question}
                                   </h4>
                                   {poll.isActive ? (
-                                    <span className="bg-accent-1/10 text-accent-1 font-mono font-black text-[9px] uppercase px-2 py-0.5 border border-accent-1/25 shrink-0">
+                                    <span className="bg-sky-500/10 text-sky-400 text-[9px] font-semibold px-2 py-0.5 rounded-md border border-sky-500/20">
                                       Active
                                     </span>
                                   ) : poll.isClosed ? (
-                                    <span className="bg-zinc-900 text-zinc-400 font-mono font-black text-[9px] uppercase px-2 py-0.5 border border-zinc-800 shrink-0">
+                                    <span className="bg-zinc-800 text-zinc-400 text-[9px] font-semibold px-2 py-0.5 rounded-md">
                                       Closed
                                     </span>
-                                  ) : (
-                                    <span className="bg-zinc-900 text-zinc-500 font-mono font-black text-[9px] uppercase px-2 py-0.5 border border-zinc-800/80 shrink-0">
-                                      Draft
-                                    </span>
-                                  )}
+                                  ) : null}
                                 </div>
-                                <p className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-widest">
+                                <p className="text-[10px] text-zinc-400 font-mono">
                                   {totalVotes} {totalVotes === 1 ? "response" : "responses"}
                                 </p>
                               </div>
 
-                              {/* Controls */}
                               <div className="flex items-center gap-1.5 shrink-0">
                                 {!poll.isActive && !poll.isClosed && (
                                   <button
                                     onClick={() => onActivatePoll(poll.id)}
-                                    className="p-1.5 bg-accent-1/10 text-accent-1 hover:bg-accent-1 hover:text-black border border-accent-1/30 text-xs font-mono font-bold uppercase transition-all flex items-center gap-1 cursor-pointer"
-                                    title="Activate voting for guests"
+                                    className="px-2.5 py-1 bg-sky-500/10 text-sky-400 hover:bg-sky-500 hover:text-zinc-950 border border-sky-500/30 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer"
                                   >
                                     <Play className="h-3 w-3 fill-current" /> Launch
                                   </button>
@@ -432,8 +416,7 @@ export default function PresenterControl({
                                 {poll.isActive && (
                                   <button
                                     onClick={() => onClosePoll(poll.id)}
-                                    className="p-1.5 bg-rose-950/20 text-rose-300 hover:bg-rose-400 hover:text-black border border-rose-900 text-xs font-mono font-bold uppercase transition-all flex items-center gap-1 cursor-pointer"
-                                    title="Close voting"
+                                    className="px-2.5 py-1 bg-rose-500/10 text-rose-300 hover:bg-rose-500 hover:text-zinc-950 border border-rose-500/30 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer"
                                   >
                                     <Square className="h-3 w-3 fill-current" /> Close
                                   </button>
@@ -441,24 +424,23 @@ export default function PresenterControl({
                                 {poll.isClosed && (
                                   <button
                                     onClick={() => onActivatePoll(poll.id)}
-                                    className="p-1.5 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800 text-xs font-mono font-bold uppercase transition-all flex items-center gap-1 cursor-pointer"
-                                    title="Re-open voting"
+                                    className="px-2.5 py-1 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer"
                                   >
-                                    <RefreshCw className="h-3 w-3" /> Re-launch
+                                    <RefreshCw className="h-3 w-3" /> Re-open
                                   </button>
                                 )}
                                 <button
                                   onClick={() => onDeletePoll(poll.id)}
-                                  className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-zinc-900 border border-transparent hover:border-zinc-800 transition-colors cursor-pointer"
-                                  title="Delete poll"
+                                  className="p-1 text-zinc-500 hover:text-rose-400 rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer"
+                                  title="Delete Poll"
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
                               </div>
                             </div>
 
-                            {/* Options visualization */}
-                            <div className="space-y-2.5 pt-2 border-t border-zinc-900">
+                            {/* Option Bars */}
+                            <div className="space-y-2 pt-2 border-t border-zinc-800/80">
                               {poll.options.map((option, index) => {
                                 const votes = poll.votes[index] || 0;
                                 const percentage = totalVotes > 0 
@@ -467,17 +449,17 @@ export default function PresenterControl({
 
                                 return (
                                   <div key={index} className="space-y-1 text-xs">
-                                    <div className="flex justify-between font-semibold text-zinc-300">
-                                      <span className="truncate pr-3">{option}</span>
-                                      <span className="font-mono text-zinc-400 shrink-0">
+                                    <div className="flex justify-between font-medium text-zinc-300">
+                                      <span className="truncate pr-2">{option}</span>
+                                      <span className="font-mono text-zinc-400 text-[11px]">
                                         {percentage}% ({votes})
                                       </span>
                                     </div>
-                                    <div className="h-2 w-full bg-zinc-900 border border-zinc-850 rounded-none overflow-hidden relative">
+                                    <div className="h-2 w-full bg-zinc-900 border border-zinc-800 rounded-md overflow-hidden relative">
                                       <div
                                         style={{ width: `${percentage}%` }}
                                         className={`h-full transition-all duration-300 ${
-                                          poll.isActive ? "bg-accent-1" : "bg-zinc-600"
+                                          poll.isActive ? "bg-sky-400" : "bg-zinc-600"
                                         }`}
                                       ></div>
                                     </div>
@@ -493,57 +475,56 @@ export default function PresenterControl({
                 </div>
               </motion.div>
             ) : (
-              // Q&A Moderation Panel
+              /* Q&A Moderation Queue */
               <motion.div
                 key="tab-qa"
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -5 }}
                 transition={{ duration: 0.15 }}
-                className="space-y-5"
+                className="space-y-4"
               >
-                <div className="border-b border-zinc-900 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="border-b border-zinc-800 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <h3 className="font-mono font-black uppercase tracking-wider text-white text-sm">Audience Q&A Moderation</h3>
-                    <p className="text-[11px] text-zinc-400">Filter, upvote, and flag audience questions live.</p>
+                    <h3 className="font-semibold text-white text-sm">Audience Q&A Queue</h3>
+                    <p className="text-[11px] text-zinc-400">Moderate and tag incoming attendee questions.</p>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5">
                     <button
                       onClick={handleAISummarizeQA}
-                      className="px-3 py-1.5 bg-accent-3/10 hover:bg-accent-3 text-accent-3 hover:text-black border border-accent-3/30 font-mono font-black text-xs uppercase flex items-center gap-1.5 transition-all cursor-pointer"
+                      className="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-xl font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
                     >
                       <Sparkles className="h-3.5 w-3.5" /> AI Summary
                     </button>
 
-                    {/* Filters */}
-                    <div className="flex bg-zinc-950 p-0.5 border border-zinc-900 text-xs">
+                    <div className="flex bg-zinc-900 p-0.5 rounded-lg border border-zinc-800 text-xs">
                       <button
                         onClick={() => setQaFilter("active")}
-                        className={`px-3 py-1.5 font-mono uppercase font-black transition-all cursor-pointer ${
+                        className={`px-3 py-1 rounded-md font-medium transition-all cursor-pointer ${
                           qaFilter === "active"
-                            ? "bg-zinc-900 text-accent-3 border border-accent-3/20"
-                            : "text-zinc-500 hover:text-zinc-300"
+                            ? "bg-zinc-800 text-indigo-400"
+                            : "text-zinc-400 hover:text-zinc-200"
                         }`}
                       >
                         Unanswered ({room.questions.filter(q => !q.isAnswered && !q.isArchived).length})
                       </button>
                       <button
                         onClick={() => setQaFilter("answered")}
-                        className={`px-3 py-1.5 font-mono uppercase font-black transition-all cursor-pointer ${
+                        className={`px-3 py-1 rounded-md font-medium transition-all cursor-pointer ${
                           qaFilter === "answered"
-                            ? "bg-zinc-900 text-accent-3 border border-accent-3/20"
-                            : "text-zinc-500 hover:text-zinc-300"
+                            ? "bg-zinc-800 text-indigo-400"
+                            : "text-zinc-400 hover:text-zinc-200"
                         }`}
                       >
                         Answered ({room.questions.filter(q => q.isAnswered && !q.isArchived).length})
                       </button>
                       <button
                         onClick={() => setQaFilter("archived")}
-                        className={`px-3 py-1.5 font-mono uppercase font-black transition-all cursor-pointer ${
+                        className={`px-3 py-1 rounded-md font-medium transition-all cursor-pointer ${
                           qaFilter === "archived"
-                            ? "bg-zinc-900 text-accent-3 border border-accent-3/20"
-                            : "text-zinc-500 hover:text-zinc-300"
+                            ? "bg-zinc-800 text-indigo-400"
+                            : "text-zinc-400 hover:text-zinc-200"
                         }`}
                       >
                         Archived ({room.questions.filter(q => q.isArchived).length})
@@ -553,11 +534,11 @@ export default function PresenterControl({
                 </div>
 
                 {filteredQuestions.length === 0 ? (
-                  <div className="border-2 border-dashed border-zinc-900 p-16 text-center text-zinc-500 text-xs font-mono uppercase rounded-none">
-                    No questions in this filter.
+                  <div className="border border-dashed border-zinc-800 p-16 text-center text-zinc-500 text-xs rounded-2xl">
+                    No questions in this filter tab.
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     <AnimatePresence initial={false}>
                       {filteredQuestions.map((q) => (
                         <motion.div
@@ -566,55 +547,49 @@ export default function PresenterControl({
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.98 }}
                           layout
-                          className={`p-4 border-2 flex items-start justify-between gap-4 bg-zinc-950 transition-all rounded-none ${
+                          className={`p-4 rounded-xl border flex items-start justify-between gap-4 glass-panel ${
                             q.isAnswered 
-                              ? "border-emerald-900 bg-emerald-950/10" 
+                              ? "border-emerald-500/30 bg-emerald-500/5" 
                               : q.isArchived 
-                                ? "border-zinc-900 opacity-60" 
-                                : "border-zinc-900"
+                                ? "border-zinc-800 opacity-60" 
+                                : "border-zinc-800/80"
                           }`}
                         >
-                          <div className="space-y-2 min-w-0">
+                          <div className="space-y-1.5 min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
                               {q.isAnswered && (
-                                <span className="text-[9px] font-mono font-black text-emerald-400 bg-emerald-950 border border-emerald-800 px-1.5 py-0.5 uppercase">
+                                <span className="text-[9px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-md">
                                   ✓ Answered
                                 </span>
                               )}
-                              {q.isArchived && (
-                                <span className="text-[9px] font-mono font-black text-zinc-400 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 uppercase">
-                                  Archived
-                                </span>
-                              )}
-                              <span className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-wider">
+                              <span className="text-[10px] font-mono text-zinc-400">
                                 ▲ {q.upvotes} {q.upvotes === 1 ? "upvote" : "upvotes"}
                               </span>
                             </div>
-                            <p className="text-xs sm:text-sm text-zinc-100 font-bold break-words leading-relaxed">
+                            <p className="text-xs sm:text-sm text-zinc-100 font-medium break-words leading-relaxed">
                               "{q.text}"
                             </p>
-                            <span className="text-[10px] font-mono text-zinc-500 block uppercase">
+                            <span className="text-[10px] text-zinc-500 font-mono block">
                               Asked at {new Date(q.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             </span>
                           </div>
 
-                          {/* Action Items */}
                           <div className="flex items-center gap-1.5 shrink-0">
                             <button
                               onClick={() => onToggleAnswered(q.id)}
-                              className={`p-1.5 border-2 transition-all cursor-pointer ${
+                              className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
                                 q.isAnswered
-                                  ? "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white"
-                                  : "bg-emerald-950 text-emerald-400 border-emerald-800 hover:bg-emerald-900"
+                                  ? "bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-white"
+                                  : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
                               }`}
-                              title={q.isAnswered ? "Mark as unanswered" : "Mark as answered live"}
+                              title={q.isAnswered ? "Mark unanswered" : "Mark answered live"}
                             >
-                              <Check className="h-4 w-4 stroke-[2.5]" />
+                              <Check className="h-4 w-4" />
                             </button>
 
                             <button
                               onClick={() => onToggleArchive(q.id)}
-                              className="p-1.5 border-2 border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                              className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white transition-colors cursor-pointer"
                               title={q.isArchived ? "Unarchive question" : "Archive question"}
                             >
                               {q.isArchived ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
@@ -622,8 +597,8 @@ export default function PresenterControl({
 
                             <button
                               onClick={() => onDeleteQuestion(q.id)}
-                              className="p-1.5 border-2 border-transparent hover:border-rose-900 hover:bg-rose-950/20 text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
-                              title="Delete permanently"
+                              className="p-1.5 rounded-lg border border-transparent hover:border-rose-500/30 hover:bg-rose-500/10 text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
+                              title="Delete question"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -641,31 +616,31 @@ export default function PresenterControl({
 
       {/* AI Poll Generator Modal */}
       {showAiPollModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-zinc-950 border-2 border-accent-1 p-6 w-full max-w-md space-y-4 rounded-none shadow-2xl relative"
+            className="glass-panel border-indigo-500/30 p-6 w-full max-w-md space-y-4 rounded-2xl shadow-2xl relative"
           >
-            <div className="flex justify-between items-center border-b border-zinc-900 pb-3">
-              <h3 className="font-mono font-black uppercase text-accent-1 text-sm flex items-center gap-2">
-                <Wand2 className="h-4 w-4" /> Gemini AI Poll Generator
+            <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
+              <h3 className="font-semibold text-indigo-300 text-sm flex items-center gap-2">
+                <Wand2 className="h-4 w-4 text-indigo-400" /> Gemini AI Poll Draft
               </h3>
               <button
                 onClick={() => setShowAiPollModal(false)}
                 className="text-zinc-500 hover:text-white p-1 cursor-pointer"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <p className="text-xs text-zinc-400">
-              Enter any presentation topic, and Gemini AI will automatically compose an engaging poll question with 4 answer choices.
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Enter your talk topic, and Gemini AI will compose a question with 4 choices.
             </p>
 
             <form onSubmit={handleAIPollGenerate} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-mono font-black uppercase text-zinc-400 mb-1.5">
+                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
                   Presentation Topic
                 </label>
                 <input
@@ -673,32 +648,32 @@ export default function PresenterControl({
                   required
                   value={aiTopicInput}
                   onChange={(e) => setAiTopicInput(e.target.value)}
-                  placeholder="e.g. AI Ethics, Remote Work, Product Strategy"
-                  className="w-full bg-zinc-900 border-2 border-zinc-800 focus:border-accent-1 focus:outline-none p-3 text-xs text-white"
+                  placeholder="e.g. Microservices, AI Ethics, Design Systems"
+                  className="w-full bg-zinc-950/80 border border-zinc-800 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-xs text-white"
                   autoFocus
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowAiPollModal(false)}
-                  className="px-4 py-2 text-xs font-mono uppercase font-bold text-zinc-400 hover:text-white cursor-pointer"
+                  className="px-3.5 py-2 text-xs font-medium text-zinc-400 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isGeneratingAI || !aiTopicInput.trim()}
-                  className="px-5 py-2.5 bg-accent-1 hover:bg-cyan-300 text-black font-mono font-black text-xs uppercase flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white font-semibold text-xs rounded-xl flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {isGeneratingAI ? (
                     <>
-                      <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Generating...
+                      <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Drafting...
                     </>
                   ) : (
                     <>
-                      <Wand2 className="h-3.5 w-3.5" /> Generate Poll
+                      <Wand2 className="h-3.5 w-3.5" /> Draft Poll
                     </>
                   )}
                 </button>
@@ -708,46 +683,46 @@ export default function PresenterControl({
         </div>
       )}
 
-      {/* AI Q&A Summary Modal */}
+      {/* AI Q&A Insights Modal */}
       {showAiSummaryModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-zinc-950 border-2 border-accent-3 p-6 w-full max-w-lg space-y-5 rounded-none shadow-2xl relative"
+            className="glass-panel border-sky-500/30 p-6 w-full max-w-lg space-y-5 rounded-2xl shadow-2xl relative"
           >
-            <div className="flex justify-between items-center border-b border-zinc-900 pb-3">
-              <h3 className="font-mono font-black uppercase text-accent-3 text-sm flex items-center gap-2">
-                <Sparkles className="h-4 w-4" /> AI Audience Q&A Insights
+            <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
+              <h3 className="font-semibold text-sky-300 text-sm flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-sky-400" /> AI Q&A Insights
               </h3>
               <button
                 onClick={() => setShowAiSummaryModal(false)}
                 className="text-zinc-500 hover:text-white p-1 cursor-pointer"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             {isSummarizingAI ? (
               <div className="py-12 text-center space-y-3">
-                <RefreshCw className="h-8 w-8 text-accent-3 animate-spin mx-auto" />
-                <p className="text-xs font-mono uppercase text-zinc-400">Gemini is analyzing audience sentiment...</p>
+                <RefreshCw className="h-8 w-8 text-sky-400 animate-spin mx-auto" />
+                <p className="text-xs text-zinc-400">Gemini AI is analyzing audience questions...</p>
               </div>
             ) : aiSummaryResult ? (
               <div className="space-y-4">
-                <div className="p-3.5 bg-accent-3/10 border border-accent-3/30 text-xs text-zinc-200 font-medium leading-relaxed">
-                  <span className="font-mono font-black uppercase text-accent-3 block mb-1">Executive Overview</span>
+                <div className="p-3.5 bg-sky-500/10 border border-sky-500/20 rounded-xl text-xs text-zinc-200 leading-relaxed">
+                  <span className="font-semibold text-sky-300 block mb-1">Executive Summary</span>
                   {aiSummaryResult.summary}
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="text-xs font-mono font-black text-white uppercase tracking-wider">
+                  <h4 className="text-xs font-semibold text-white">
                     Key Presenter Talking Points
                   </h4>
                   <div className="space-y-2">
                     {aiSummaryResult.keyPoints.map((point, idx) => (
-                      <div key={idx} className="p-3 bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 flex items-start gap-2.5">
-                        <span className="bg-accent-3/20 text-accent-3 font-mono font-black text-[10px] px-1.5 py-0.5 rounded-none shrink-0">
+                      <div key={idx} className="p-3 bg-zinc-900/60 border border-zinc-800 rounded-xl text-xs text-zinc-300 flex items-start gap-2.5">
+                        <span className="bg-sky-500/20 text-sky-300 font-mono text-[10px] px-1.5 py-0.5 rounded-md shrink-0">
                           {idx + 1}
                         </span>
                         <p className="leading-relaxed">{point}</p>
@@ -761,18 +736,18 @@ export default function PresenterControl({
             <div className="pt-2 flex justify-end">
               <button
                 onClick={() => setShowAiSummaryModal(false)}
-                className="px-5 py-2 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-xs font-mono uppercase font-bold text-white cursor-pointer"
+                className="px-4 py-2 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-xs font-medium rounded-xl text-white cursor-pointer"
               >
-                Close Insights
+                Close
               </button>
             </div>
           </motion.div>
         </div>
       )}
 
-      {/* Control Footer */}
-      <footer className="border-t border-zinc-900 bg-black py-4 text-center text-[10px] text-zinc-550 font-mono uppercase tracking-wider">
-        CastVote Presenter Dashboard. Real-time sync is active and secured.
+      {/* Footer */}
+      <footer className="border-t border-zinc-900 bg-[#09090B] py-3 text-center text-[10px] text-zinc-500">
+        CastVote Presenter Workspace
       </footer>
     </div>
   );
